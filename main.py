@@ -12,9 +12,9 @@ PNG: the first 8 bytes are the magic 89 50 4E 47 0D 0A 1A 0A, then the
 IHDR chunk holds width and height as big-endian 32-bit integers.
 
 JPEG: the file starts with FF D8. Markers are walked two bytes at a
-time; a Start-Of-Frame marker (0xC0, or 0xC2 for progressive) carries
-the height and then the width as big-endian 16-bit integers, five
-bytes past the marker code.
+time; a Start-Of-Frame marker (0xC0 baseline, 0xC1 extended
+sequential, or 0xC2 progressive) carries the height and then the
+width as big-endian 16-bit integers, five bytes past the marker code.
 
 Run:
     mkdir -p out && MAKEFUN_OUTPUT_DIR=out python3 main.py
@@ -68,7 +68,7 @@ def jpeg_size(blob):
         seg_len = struct.unpack(">H", blob[pos + 2:pos + 4])[0]
         if seg_len < 2 or pos + 2 + seg_len > len(blob):
             return None
-        if marker in (0xC0, 0xC2):
+        if marker in (0xC0, 0xC1, 0xC2):
             # Segment payload: 1 byte precision, then height, then width.
             h, w = struct.unpack(">HH", blob[pos + 5:pos + 9])
             return (w, h)
